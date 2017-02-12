@@ -1,3 +1,4 @@
+from __future__ import print_function
 import time
 import subprocess
 from argparse import ArgumentParser
@@ -17,15 +18,16 @@ def main():
 
 def curl_many(n, url, start_port):
 
-    man = TorManager() if start_port is None else TorManager(start_port=start_port)
+    kwargs = {} if start_port is None else { 'start_port': start_port }
+
     curls = set()
 
-    try:
+    with TorManager(**kwargs) as man:
 
         for i in range(n):
-            man.spawn().wait_for()
+            man.spawn()
 
-        print 'spawned tors'
+        print('spawned tors')
 
         for t in man.get_tors():
             with open('/dev/null', 'w') as devnull:
@@ -40,19 +42,13 @@ def curl_many(n, url, start_port):
                     )
                 curls.add(proc)
 
-        print 'spawned curls'
+        print('spawned curls')
 
         while True:
             time.sleep(1337)
 
-    except Exception as e:
-        raise
-
-    finally:
-        for tor in man.get_tors():
-            tor.kill()
-        for proc in curls:
-            proc.kill()
+    for proc in curls:
+        proc.kill()
 
 
 if __name__ == '__main__':
