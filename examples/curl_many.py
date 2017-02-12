@@ -3,20 +3,21 @@ import subprocess
 from argparse import ArgumentParser
 
 import requests
-import torplex
+from torplex import TorManager
 
 
 def main():
     parser = ArgumentParser(description="Curl the same url from multiple IP's at once into /dev/null")
     parser.add_argument('n', metavar='N', type=int, help='number of concurrent curls')
     parser.add_argument('url', metavar='URL', help='url to curl')
+    parser.add_argument('-p', '--start-port', metavar='START_PORT', help='port for first Tor proxy server')
     args = parser.parse_args()
-    curl_many(args.n, args.url)
+    curl_many(args.n, args.url, args.start_port)
 
 
-def curl_many(n, url):
+def curl_many(n, url, start_port):
 
-    man = torplex.manager()
+    man = TorManager() if start_port is None else TorManager(start_port=start_port)
     curls = set()
 
     try:

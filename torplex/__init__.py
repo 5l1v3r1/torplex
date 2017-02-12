@@ -1,28 +1,15 @@
+import binascii
 import os
 import shutil
 import subprocess
 import time
 
-import binascii
-
 import stem
 from stem.control import Controller
 
 
-DEFAULT_START_PORT = 1337
+DEFAULT_START_PORT = 13337
 DEFAULT_DATA_DIR_DIR = '/tmp/torplex-data-dirs'
-
-
-def manager():
-    return Manager(_inc_port_it(DEFAULT_START_PORT), 'tor', DEFAULT_DATA_DIR_DIR)
-
-
-def _inc_port_it(start):
-    port = start
-    while True:
-        yield port, port + 1
-        port += 2
-
 
 
 class TorBase(object):
@@ -30,18 +17,15 @@ class TorBase(object):
     def get_port(self):
         return self.socks_port
 
-
     def kill(self):
         self.proc.kill()
         if os.path.isdir(self.data_dir):
             shutil.rmtree(self.data_dir)
 
-
     def connect(self):
         ctrl = Controller.from_port(port=self.control_port)
         ctrl.authenticate(password=self.password)
         return ctrl
-
 
     def wait_for(self):
         while True:
@@ -53,12 +37,17 @@ class TorBase(object):
                 time.sleep(.01)
 
 
+class TorManager(object):
 
-class Manager(object):
+    def __init__(self, start_port=DEFAULT_START_PORT, data_dir_dir=DEFAULT_DATA_DIR_DIR, tor_exe='tor'):
 
-    def __init__(self, port_it, tor_exe, data_dir_dir):
+        def it():
+            x = start_port
+            while True:
+                yield x, x + 1
+                x += 2
 
-        self.port_it = port_it
+        self.port_it = it()
         self.tor_exe = tor_exe
         self.data_dir_dir = data_dir_dir
         self.tors = set()
@@ -91,7 +80,6 @@ class Manager(object):
 
     def _hash_password(self, password):
         return subprocess.check_output([self.tor_exe, '--hash-password', password])[:-1]
-
 
     def spawn(self):
         tor = self.Tor()

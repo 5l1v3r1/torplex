@@ -1,8 +1,8 @@
-import torplex
 import requests
 from stem.control import Listener
+from torplex import TorManager
 
-man = torplex.manager()
+man = TorManager()
 
 try:
 
