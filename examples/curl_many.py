@@ -8,9 +8,9 @@ from torplex import TorManager
 
 def main():
     parser = ArgumentParser(description="Curl the same url from multiple IP's at once into /dev/null")
-    parser.add_argument('n', metavar='N', type=int, help='number of concurrent curls')
+    parser.add_argument('n', type=int, metavar='N', help='number of concurrent curls')
     parser.add_argument('url', metavar='URL', help='url to curl')
-    parser.add_argument('-p', '--start-port', metavar='START_PORT', help='port for first Tor proxy server')
+    parser.add_argument('-p', '--start-port', type=int, metavar='START_PORT', help='port for first Tor proxy server')
     args = parser.parse_args()
     curl_many(args.n, args.url, args.start_port)
 
