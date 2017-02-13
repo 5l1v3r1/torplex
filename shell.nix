@@ -9,6 +9,7 @@ let
       url = "mirror://pypi/s/stem/${name}.tar.gz";
       sha256 = "1j7pnblrn0yr6jmxvsq6y0ihmxmj5x50jl2n2606w67f6wq16j9n";
     };
+    buildInputs = lib.optional (!stdenv.isDarwin) tor;
     propagatedBuildInputs = [ mock pyflakes pycodestyle pycrypto tox ];
   };
 
