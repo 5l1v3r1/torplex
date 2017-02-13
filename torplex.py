@@ -66,8 +66,8 @@ class TorManager(object):
                         '--PidFile', 'pid',
                         '--DataDirectory', tor.data_dir,
                         ],
-                    stdout=os.devnull,
-                    stderr=os.devnull,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
                     )
 
                 with open(os.path.join(tor.data_dir, 'pid'), 'r') as pf:
