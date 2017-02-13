@@ -97,7 +97,7 @@ class TorManager(object):
 
 
     def remove_all(self):
-        # Avoid modify set during iteration
+        # Avoid modifying set during iteration
         for t in list(self.tors):
             self.remove(t)
 
