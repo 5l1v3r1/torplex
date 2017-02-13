@@ -4,7 +4,7 @@ import signal
 import shutil
 import subprocess
 
-import stem
+from stem.process import launch_tor_with_config
 from stem.control import Controller
 
 
@@ -17,13 +17,13 @@ class TorBase(object):
     def get_port(self):
         return self.socks_port
 
+    def get_proc(self):
+        return self.proc
+
     def connect(self):
         ctrl = Controller.from_port(port=self.control_port)
         ctrl.authenticate(password=self.password)
         return ctrl
-
-    def kill(self):
-        os.kill(self.pid, signal.SIGKILL)
 
     def cleanup(self):
         if os.path.isdir(self.data_dir):
@@ -57,27 +57,23 @@ class TorManager(object):
                 tor.data_dir = os.path.join(self.base_dir, tid)
                 tor.password = binascii.hexlify(os.urandom(8)).decode('utf-8')
 
-                subprocess.check_call([
-                        self.tor_exe,
-                        '--HashedControlPassword', self._hash_password(tor.password),
-                        '--SocksPort', str(tor.socks_port),
-                        '--ControlPort', str(tor.control_port),
-                        '--RunAsDaemon', '1',
-                        '--PidFile', 'pid',
-                        '--DataDirectory', tor.data_dir,
-                        ],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    )
+                print(self._hash_password(tor.password))
+                print(type(self._hash_password(tor.password)))
+                config = {
+                    'HashedControlPassword': self._hash_password(tor.password),
+                    'SocksPort': str(tor.socks_port),
+                    'ControlPort': str(tor.control_port),
+                    'DataDirectory': tor.data_dir,
+                    }
 
-                with open(os.path.join(tor.data_dir, 'pid'), 'r') as pf:
-                    tor.pid = int(pf.read())
+                # tor.proc = launch_tor_with_config(config, self.tor_exe, take_ownership=True)
+                tor.proc = launch_tor_with_config(config, self.tor_exe, take_ownership=False)
 
         self.Tor = Tor
 
 
     def _hash_password(self, password):
-        return subprocess.check_output([self.tor_exe, '--hash-password', password])[:-1]
+        return subprocess.check_output([self.tor_exe, '--hash-password', password])[:-1].decode('utf-8')
 
 
     def spawn(self):
@@ -92,7 +88,7 @@ class TorManager(object):
 
     def remove(self, tor):
         self.tors.remove(tor)
-        tor.kill()
+        tor.get_proc().kill()
         tor.cleanup()
 
 
