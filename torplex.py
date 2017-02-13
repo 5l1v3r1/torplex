@@ -57,19 +57,18 @@ class TorManager(object):
                 tor.data_dir = os.path.join(self.base_dir, tid)
                 tor.password = binascii.hexlify(os.urandom(8)).decode('utf-8')
 
-                with open('/dev/null', 'w') as devnull:
-                    subprocess.check_call([
-                            self.tor_exe,
-                            '--HashedControlPassword', self._hash_password(tor.password),
-                            '--SocksPort', str(tor.socks_port),
-                            '--ControlPort', str(tor.control_port),
-                            '--RunAsDaemon', '1',
-                            '--PidFile', 'pid',
-                            '--DataDirectory', tor.data_dir,
-                            ],
-                        stdout=devnull,
-                        stderr=devnull,
-                        )
+                subprocess.check_call([
+                        self.tor_exe,
+                        '--HashedControlPassword', self._hash_password(tor.password),
+                        '--SocksPort', str(tor.socks_port),
+                        '--ControlPort', str(tor.control_port),
+                        '--RunAsDaemon', '1',
+                        '--PidFile', 'pid',
+                        '--DataDirectory', tor.data_dir,
+                        ],
+                    stdout=os.devnull,
+                    stderr=os.devnull,
+                    )
 
                 with open(os.path.join(tor.data_dir, 'pid'), 'r') as pf:
                     tor.pid = int(pf.read())
@@ -98,6 +97,7 @@ class TorManager(object):
 
 
     def remove_all(self):
+        # Avoid modify set during iteration
         for t in list(self.tors):
             self.remove(t)
 

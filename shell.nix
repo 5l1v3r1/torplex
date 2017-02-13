@@ -2,7 +2,7 @@ with import <nixpkgs> {};
 
 let
 
-  stem = with python27Packages; buildPythonPackage rec {
+  stem = with python34Packages; buildPythonPackage rec {
     name = "stem-${version}";
     version = "1.5.4";
     src = fetchurl {
@@ -15,10 +15,10 @@ let
 in stdenv.mkDerivation {
   name = "env";
   buildInputs = [
-    python27
-    python27Packages.requests2
-    python27Packages.pysocks
     stem
+    python34
+    python34Packages.pysocks
+    python34Packages.requests2
   ] ++ lib.optional (!stdenv.isDarwin) tor;
   shellHook = ''
     export PYTHONPATH=.:$PYTHONPATH
