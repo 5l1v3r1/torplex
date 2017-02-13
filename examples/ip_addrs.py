@@ -1,4 +1,3 @@
-from __future__ import print_function
 import requests
 from stem.control import Listener
 from torplex import TorManager
